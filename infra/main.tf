@@ -61,8 +61,8 @@ resource "aws_instance" "mern_app" {
               # Pull your repo (replace with your GitHub repo)
               apt install -y git
               cd /home/ubuntu
-              git clone https://github.com/<your-username>/<your-repo>.git mern-app
-              cd mern-app
+              git clone https://github.com/HannanDevops28/MERN_RabbitMQ_Deployment.git
+              cd MERN_RabbitMQ_Deployment
 
               docker-compose up -d
               EOF

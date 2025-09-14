@@ -10,6 +10,7 @@ package-lock.json
 .env
 .env.local
 .env.development
+.env.example
 .env.production
 .env.test
 
@@ -66,3 +67,6 @@ terraform.rc
 # Misc
 *.swp
 *.swo
+
+
+git remote set-url origin https://HannanDevops28@github.com/HannanDevops28/MERN-RabbitMQ-CICD.git

@@ -20,61 +20,17 @@ services:
       timeout: 5s
       retries: 5
 
-  analytics-db:
-    image: mongo:6
-    container_name: analytics-db
-    restart: always
-    ports:
-      - "27018:27017"
-    environment:
-      MONGO_INITDB_DATABASE: analytics
-    volumes:
-      - analytics_data:/data/db
-    networks:
-      - app-network
-
-  analytics-service:
-    build: ./services/analytics
-    container_name: analytics-service
-    restart: always
-    ports:
-      - "5004:5004"
-    environment:
-      - PORT=5004
-      - MONGO_URI=${ANALYTICS_URI}
-    depends_on:
-      - analytics-db
-    networks:
-      - app-network
-
-  consumer-service:
-    build: ./services/consumer
-    container_name: consumer-service
-    restart: always
-    environment:
-      - RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672
-      - PRODUCTS_API=http://products-service:5002/products
-      - ANALYTICS_URI=mongodb://analytics-db:27017/analytics
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-      products-service:
-        condition: service_started
-      analytics-db:
-        condition: service_started
-    networks:
-      - app-network
-
   users-service:
     build: ./services/users
     container_name: users-service
     restart: always
     ports:
-      - "5001:5001"
+      - "${USERS_PORT}:5001"
     environment:
-      - PORT=5001
+      - PORT=${USERS_PORT}
       - MONGO_URI=${USERS_URI}
-      - RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672
+      - RABBITMQ_URI=${RABBITMQ_URL}
+      - NODE_ENV=${NODE_ENV}
     depends_on:
       - rabbitmq
     networks:
@@ -85,11 +41,12 @@ services:
     container_name: products-service
     restart: always
     ports:
-      - "5002:5002"
+      - "${PRODUCTS_PORT}:5002"
     environment:
-      - PORT=5002
+      - PORT=${PRODUCTS_PORT}
       - MONGO_URI=${PRODUCTS_URI}
-      - RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672
+      - RABBITMQ_URI=${RABBITMQ_URL}
+      - NODE_ENV=${NODE_ENV}
     depends_on:
       - rabbitmq
     networks:
@@ -100,13 +57,44 @@ services:
     container_name: orders-service
     restart: always
     ports:
-      - "5003:5003"
+      - "${ORDERS_PORT}:5003"
     environment:
-      - PORT=5003
+      - PORT=${ORDERS_PORT}
       - MONGO_URI=${ORDERS_URI}
-      - RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672
+      - RABBITMQ_URI=${RABBITMQ_URL}
+      - NODE_ENV=${NODE_ENV}
     depends_on:
       - rabbitmq
+    networks:
+      - app-network
+
+  analytics-service:
+    build: ./services/analytics
+    container_name: analytics-service
+    restart: always
+    ports:
+      - "${ANALYTICS_PORT}:5004"
+    environment:
+      - PORT=${ANALYTICS_PORT}
+      - MONGO_URI=${ANALYTICS_URI}
+      - NODE_ENV=${NODE_ENV}
+    networks:
+      - app-network
+
+  consumer-service:
+    build: ./services/consumer
+    container_name: consumer-service
+    restart: always
+    environment:
+      - RABBITMQ_URI=${RABBITMQ_URL}
+      - PRODUCTS_API=http://products-service:${PRODUCTS_PORT}/products
+      - ANALYTICS_URI=${ANALYTICS_URI}
+      - NODE_ENV=${NODE_ENV}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      products-service:
+        condition: service_started
     networks:
       - app-network
 
@@ -115,12 +103,13 @@ services:
     container_name: frontend
     restart: always
     ports:
-      - "3000:3000"
+      - "${FRONTEND_PORT}:3000"
     environment:
-      - NEXT_PUBLIC_USERS_API=http://users-service:5001
-      - NEXT_PUBLIC_PRODUCTS_API=http://products-service:5002
-      - NEXT_PUBLIC_ORDERS_API=http://orders-service:5003
-      - NEXT_PUBLIC_ANALYTICS_API=http://analytics-service:5004
+      - NEXT_PUBLIC_USERS_API=http://users-service:${USERS_PORT}
+      - NEXT_PUBLIC_PRODUCTS_API=http://products-service:${PRODUCTS_PORT}
+      - NEXT_PUBLIC_ORDERS_API=http://orders-service:${ORDERS_PORT}
+      - NEXT_PUBLIC_ANALYTICS_API=http://analytics-service:${ANALYTICS_PORT}
+      - NODE_ENV=${NODE_ENV}
     depends_on:
       - users-service
       - products-service
@@ -131,7 +120,6 @@ services:
 
 volumes:
   rabbitmq_data:
-  analytics_data:
 
 networks:
   app-network:

@@ -69,4 +69,5 @@ terraform.rc
 *.swo
 
 
-git remote set-url origin https://HannanDevops28@github.com/HannanDevops28/MERN-RabbitMQ-CICD.git
+e-comm.pem
+e-comm.pemZone.Identifier

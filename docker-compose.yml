@@ -1,3 +1,4 @@
+
 version: "3.8"
 
 services:
@@ -78,6 +79,7 @@ services:
       - PORT=${ANALYTICS_PORT}
       - MONGO_URI=${ANALYTICS_URI}
       - NODE_ENV=${NODE_ENV}
+      - ANALYTICS_URI=${ANALYTICS_URI}
     networks:
       - app-network
 

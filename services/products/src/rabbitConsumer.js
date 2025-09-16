@@ -18,7 +18,6 @@ await handler(payload);
 ch.ack(msg);
 } catch (err) {
 console.error('[products] failed to process message', err);
-// don't ack -> will requeue (in a more advanced setup we'd move to dead-letter)
 }
 }, { noAck: false });
 }

@@ -7,9 +7,9 @@ const RABBITMQ_URI =
   process.env.RABBITMQ_URI || "amqp://guest:guest@rabbitmq:5672";
 const PRODUCTS_API =
   process.env.PRODUCTS_API || "http://products-service:5002/products";
-const ANALYTICS_URI = process.env.ANALYTICS_URI || "mongodb://mongo:27017/analytics";
+const ANALYTICS_URI =
+  process.env.ANALYTICS_URI || "mongodb://mongo:27017/analytics";
 
-// MongoDB Schema for Analytics
 const orderAnalyticsSchema = new mongoose.Schema({
   productId: String,
   quantity: Number,
@@ -37,37 +37,32 @@ async function startConsumer() {
     connection = await amqp.connect(RABBITMQ_URI);
     channel = await connection.createChannel();
 
-    // Declare queues
     await channel.assertQueue("orderQueue");
     await channel.assertQueue("emailQueue");
     await channel.assertQueue("analyticsQueue");
 
     console.log("✅ Consumer connected. Waiting for messages...");
 
-    // Order Processing
     channel.consume("orderQueue", async (msg) => {
       if (!msg) return;
       try {
         const order = JSON.parse(msg.content.toString());
         console.log("📦 Processing order:", order);
 
-        // Reduce stock
         await axios.patch(`${PRODUCTS_API}/${order.productId}/reduce`, {
           quantity: order.quantity,
         });
 
-        // Forward order to email & analytics
         channel.sendToQueue("emailQueue", Buffer.from(JSON.stringify(order)));
         channel.sendToQueue("analyticsQueue", Buffer.from(JSON.stringify(order)));
 
         channel.ack(msg);
       } catch (err) {
         console.error("❌ Failed to process order:", err.message);
-        channel.nack(msg, false, true); // requeue message
+        channel.nack(msg, false, true);
       }
     });
 
-    // Email Notifications
     channel.consume("emailQueue", (msg) => {
       if (!msg) return;
       try {
@@ -80,7 +75,6 @@ async function startConsumer() {
       }
     });
 
-    // Analytics
     channel.consume("analyticsQueue", async (msg) => {
       if (!msg) return;
       try {
@@ -98,7 +92,7 @@ async function startConsumer() {
     });
   } catch (err) {
     console.error("❌ Consumer failed to connect:", err.message);
-    setTimeout(startConsumer, 5000); // retry
+    setTimeout(startConsumer, 5000);
   }
 }
 

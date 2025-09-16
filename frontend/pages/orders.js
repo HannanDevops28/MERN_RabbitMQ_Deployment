@@ -11,7 +11,7 @@ export default function Orders() {
         const res = await axios.get(
           `${process.env.NEXT_PUBLIC_ORDERS_API}/orders`
         );
-        setOrders(res.data || []); // fallback to empty array
+        setOrders(res.data || []); 
       } catch (err) {
         console.error("Failed to fetch orders:", err);
         setOrders([]);

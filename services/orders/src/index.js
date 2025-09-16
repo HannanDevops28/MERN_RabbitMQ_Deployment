@@ -18,7 +18,6 @@ const RABBITMQ_URI =
 
 let channel, connection;
 
-// RabbitMQ connect
 async function connectRabbitMQ() {
   try {
     connection = await amqp.connect(RABBITMQ_URI);
@@ -31,14 +30,12 @@ async function connectRabbitMQ() {
   }
 }
 
-// Publish order
 async function publishOrder(order) {
   if (!channel) return;
   channel.sendToQueue("orderQueue", Buffer.from(JSON.stringify(order)));
   console.log("📤 Order published:", order._id);
 }
 
-// Routes
 app.get("/", (req, res) => {
   res.json({ message: "Orders Service is running 🚀" });
 });
@@ -63,26 +60,25 @@ app.post("/orders", async (req, res) => {
 
 app.get("/orders", async (req, res) => {
   try {
-const orders = await Order.find()
-  .populate("productId", "name price category") // populate product details
-  .sort({ createdAt: -1 });
+    const orders = await Order.find()
+      .populate("productId", "name price category")
+      .sort({ createdAt: -1 });
 
-res.json(
-  orders.map(order => ({
-    orderId: order._id,
-    product: order.productId, // populated
-    quantity: order.quantity,
-    status: order.status,
-    createdAt: order.createdAt
-  }))
-);
+    res.json(
+      orders.map((order) => ({
+        orderId: order._id,
+        product: order.productId,
+        quantity: order.quantity,
+        status: order.status,
+        createdAt: order.createdAt,
+      }))
+    );
   } catch (err) {
     console.error("❌ Error fetching orders:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-// Start
 mongoose
   .connect(MONGO_URI)
   .then(() => {

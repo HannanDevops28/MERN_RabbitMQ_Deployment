@@ -6,11 +6,11 @@ const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 5004;
 const ANALYTICS_URI =
-  process.env.ANALYTICS_URI || "mongodb://analytics-db:27017/analytics";
+  process.env.ANALYTICS_URI;
 
-  app.use(cors({ origin: "*" }));
+app.use(cors({ origin: "*" }));
+app.use(express.json());
 
-// MongoDB Schema
 const orderAnalyticsSchema = new mongoose.Schema({
   productId: String,
   quantity: Number,
@@ -18,11 +18,12 @@ const orderAnalyticsSchema = new mongoose.Schema({
 });
 const OrderAnalytics = mongoose.model("OrderAnalytics", orderAnalyticsSchema);
 
-// Connect to MongoDB
 mongoose
   .connect(ANALYTICS_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 30000, 
+    socketTimeoutMS: 45000,
   })
   .then(() => console.log("✅ Connected to Analytics DB"))
   .catch((err) => {
@@ -30,10 +31,8 @@ mongoose
     process.exit(1);
   });
 
-// Routes
 app.get("/", (req, res) => res.send("📊 Analytics Service Running"));
 
-// Get all analytics
 app.get("/analytics", async (req, res) => {
   try {
     const data = await OrderAnalytics.find().sort({ createdAt: -1 }).limit(50);
@@ -42,8 +41,15 @@ app.get("/analytics", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-// Aggregated stats
+app.post("/analytics", async (req, res) => {
+  try {
+    const { productId, quantity } = req.body;
+    const record = await OrderAnalytics.create({ productId, quantity });
+    res.status(201).json(record);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 app.get("/analytics/summary", async (req, res) => {
   try {
     const summary = await OrderAnalytics.aggregate([

@@ -11,6 +11,8 @@ export default function Layout({ children }) {
           <Link href="/products" className="hover:text-white">Products</Link>
           <Link href="/users" className="hover:text-white">Users</Link>
           <Link href="/analytics" className="hover:text-white">Analytics</Link>
+          <Link href="/create-order" className="hover:text-white">Create Order</Link>
+
         </nav>
       </aside>
       <main className="flex-1 p-6">{children}</main>

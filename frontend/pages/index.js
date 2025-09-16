@@ -10,6 +10,8 @@ export default function HomePage() {
         <Link href="/products" className="bg-green-600 hover:bg-green-700 p-6 rounded-lg shadow-md text-center font-bold">View Products</Link>
         <Link href="/users" className="bg-yellow-600 hover:bg-yellow-700 p-6 rounded-lg shadow-md text-center font-bold">View Users</Link>
         <Link href="/analytics" className="bg-purple-600 hover:bg-purple-700 p-6 rounded-lg shadow-md text-center font-bold">Analytics</Link>
+        <Link href="/create-order" className="bg-purple-600 hover:bg-purple-700 p-6 rounded-lg shadow-md text-center font-bold">Create Order</Link>
+     
       </div>
     </Layout>
   );

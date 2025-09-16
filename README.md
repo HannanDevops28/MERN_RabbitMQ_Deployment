@@ -64,7 +64,7 @@ ssh -i your-key.pem ec2-user@52.200.29.90
 
 Clone the repository
 
-git clone https://github.com/your-username/MERN_RabbitMQ_Deployment.git
+git clone https://github.com/HannanDevops28/MERN_RabbitMQ_Deployment
 cd MERN_RabbitMQ_Deployment
 
 
@@ -170,3 +170,4 @@ Use TLS & private subnets for databases and brokers in real deployments.
 📜 License
 
 MIT License – free to use and modify.
+
